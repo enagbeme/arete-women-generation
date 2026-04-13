@@ -206,6 +206,52 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'ArrowRight') navigateLightbox(1);
     });
 
+    // === Registration Form ===
+    const registrationForm = document.getElementById('registrationForm');
+    const formSuccess = document.getElementById('formSuccess');
+
+    if (registrationForm) {
+        registrationForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const submitBtn = this.querySelector('.btn-register');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnArrow = submitBtn.querySelector('.btn-arrow');
+
+            // Show loading state
+            btnText.textContent = 'Submitting...';
+            btnArrow.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+
+            // Submit form data to FormSubmit
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(response => {
+                if (response.ok) {
+                    formSuccess.classList.add('visible');
+                    registrationForm.reset();
+                } else {
+                    alert('Something went wrong. Please try again.');
+                }
+            })
+            .catch(() => {
+                alert('Could not submit. Please check your connection and try again.');
+            })
+            .finally(() => {
+                btnText.textContent = 'Join the Movement';
+                btnArrow.style.display = '';
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '';
+            });
+        });
+    }
+
     // === Parallax for Hero Shapes ===
     window.addEventListener('scroll', () => {
         const scrolled = window.scrollY;

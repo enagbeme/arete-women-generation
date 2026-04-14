@@ -1769,11 +1769,7 @@ a {
     }
 }
 
-@media (max-width: 768px) {
-    :root {
-        --section-padding: 64px;
-    }
-
+@media (max-width: 960px) {
     .nav-toggle {
         display: flex;
     }
@@ -1800,7 +1796,12 @@ a {
         right: 0;
     }
 
+    .nav-menu li {
+        width: 100%;
+    }
+
     .nav-link {
+        display: block;
         font-size: 1.05rem;
         padding: 14px 16px;
         width: 100%;
@@ -1820,6 +1821,12 @@ a {
         justify-content: center;
         padding: 14px 24px;
         border-radius: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --section-padding: 64px;
     }
 
     .hero {

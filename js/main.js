@@ -252,6 +252,55 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // === Preselect Interest from Get Involved Buttons ===
+    document.querySelectorAll('a[data-interest]').forEach(link => {
+        link.addEventListener('click', () => {
+            const interest = link.getAttribute('data-interest');
+            const select = document.getElementById('regInterest');
+            if (select) {
+                setTimeout(() => {
+                    select.value = interest;
+                    select.focus();
+                }, 600);
+            }
+        });
+    });
+
+    // === Newsletter Form ===
+    const newsletterForm = document.getElementById('newsletterForm');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const successMsg = this.querySelector('.newsletter-success');
+            const originalText = btn.textContent;
+            btn.textContent = 'Subscribing...';
+            btn.disabled = true;
+
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(response => {
+                if (response.ok) {
+                    successMsg.style.display = 'block';
+                    btn.textContent = 'Subscribed!';
+                    this.reset();
+                } else {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    alert('Something went wrong. Please try again.');
+                }
+            })
+            .catch(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                alert('Could not subscribe. Please check your connection.');
+            });
+        });
+    }
+
     // === Parallax for Hero Shapes ===
     window.addEventListener('scroll', () => {
         const scrolled = window.scrollY;

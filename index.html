@@ -453,7 +453,7 @@
                         <span>Faith & Transformation</span>
                     </div>
                 </div>
-                <a href="#involved" class="btn btn-light">Register Interest</a>
+                <a href="#register" class="btn btn-light" data-interest="conference">Register Interest</a>
             </div>
         </div>
     </section>
@@ -548,7 +548,7 @@
                     </div>
                     <h3>Donate</h3>
                     <p>Your generosity fuels our programs and helps us reach more women and girls in need.</p>
-                    <a href="#" class="btn btn-primary btn-sm">Give Now</a>
+                    <a href="#register" class="btn btn-primary btn-sm" data-interest="donate">Give Now</a>
                 </div>
                 <div class="involved-card fade-up">
                     <div class="involved-icon">
@@ -558,7 +558,7 @@
                     </div>
                     <h3>Volunteer</h3>
                     <p>Join our team of mentors, counselors, content creators, and project volunteers.</p>
-                    <a href="#" class="btn btn-primary btn-sm">Join Us</a>
+                    <a href="#register" class="btn btn-primary btn-sm" data-interest="volunteer">Join Us</a>
                 </div>
                 <div class="involved-card fade-up">
                     <div class="involved-icon">
@@ -568,7 +568,7 @@
                     </div>
                     <h3>Partner</h3>
                     <p>Churches, NGOs, schools, and corporate sponsors &mdash; let's create impact together.</p>
-                    <a href="#" class="btn btn-primary btn-sm">Partner With Us</a>
+                    <a href="#register" class="btn btn-primary btn-sm" data-interest="partner">Partner With Us</a>
                 </div>
             </div>
         </div>
@@ -667,9 +667,12 @@
             <div class="newsletter-content fade-up">
                 <h2>Stay Connected</h2>
                 <p>Get updates on our programs, events, and stories of transformation.</p>
-                <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('.newsletter-success').style.display='block'; this.querySelector('button').textContent='Subscribed!';">
+                <form class="newsletter-form" id="newsletterForm" action="https://formsubmit.co/ajax/aretewomengeneration@gmail.com" method="POST">
+                    <input type="hidden" name="_subject" value="New Newsletter Subscription">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="text" name="_honey" style="display:none">
                     <div class="form-group">
-                        <input type="email" placeholder="Enter your email address" required>
+                        <input type="email" name="email" placeholder="Enter your email address" required>
                         <button type="submit" class="btn btn-primary">Subscribe</button>
                     </div>
                     <p class="newsletter-success" style="display:none;">Thank you for subscribing! We'll keep you updated.</p>

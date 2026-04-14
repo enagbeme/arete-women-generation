@@ -1355,10 +1355,15 @@ a {
 }
 
 .newsletter-success {
-    font-size: 0.88rem;
-    color: var(--dusty-rose-dark);
-    margin-top: 16px;
-    font-weight: 500;
+    font-size: 0.95rem;
+    color: #1f7a3d;
+    background: #e8f5ed;
+    border: 1px solid #b9dfc6;
+    padding: 12px 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    font-weight: 600;
+    display: inline-block;
 }
 
 /* === Footer === */

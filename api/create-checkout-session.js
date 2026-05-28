@@ -1,9 +1,21 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+const ALLOWED_ORIGINS = [
+    'https://aretewomengeneration.org',
+    'https://www.aretewomengeneration.org',
+    'https://arete-women-generation.vercel.app',
+];
+
+const MAX_DONATION = 10000;
+
 module.exports = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin || '';
+    const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Vary', 'Origin');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
@@ -14,31 +26,31 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { amount, currency } = req.body;
+        const { amount } = req.body;
 
-        if (!amount || amount < 1) {
-            return res.status(400).json({ error: 'Invalid donation amount' });
+        const parsedAmount = Number(amount);
+        if (!Number.isFinite(parsedAmount) || parsedAmount < 1 || parsedAmount > MAX_DONATION) {
+            return res.status(400).json({ error: 'Donation amount must be between $1 and $10,000' });
         }
 
-        const donationCurrency = currency || 'usd';
-        const origin = req.headers.origin || req.headers.referer || 'https://aretewomengeneration.org';
+        const siteUrl = ALLOWED_ORIGINS[0];
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'payment',
             line_items: [{
                 price_data: {
-                    currency: donationCurrency,
+                    currency: 'usd',
                     product_data: {
                         name: 'Donation to ARETE Women\'s Generation',
                         description: 'Supporting women empowerment, education, and community impact.',
                     },
-                    unit_amount: Math.round(amount * 100),
+                    unit_amount: Math.round(parsedAmount * 100),
                 },
                 quantity: 1,
             }],
-            success_url: `${origin}?donation=success`,
-            cancel_url: `${origin}?donation=cancelled`,
+            success_url: `${siteUrl}?donation=success`,
+            cancel_url: `${siteUrl}?donation=cancelled`,
             submit_type: 'donate',
             billing_address_collection: 'auto',
         });

@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Submit donation — calls Vercel serverless function
     if (donateSubmit) {
         donateSubmit.addEventListener('click', async () => {
-            if (!selectedAmount || selectedAmount < 1) return;
+            if (!selectedAmount || selectedAmount < 1 || selectedAmount > 10000) return;
 
             donateSubmit.disabled = true;
             donateSubmitText.textContent = 'Redirecting to Stripe...';

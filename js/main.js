@@ -318,9 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const donateSubmit = document.getElementById('donateSubmit');
     const donateSubmitText = donateSubmit ? donateSubmit.querySelector('.donate-submit-text') : null;
     const customAmountInput = document.getElementById('customAmount');
+    const donorNameInput = document.getElementById('donorName');
+    const donorEmailInput = document.getElementById('donorEmail');
     const amountButtons = document.querySelectorAll('.donate-amount');
     let selectedAmount = 50;
-    let donationType = 'one_time';
 
     function openDonateModal() {
         if (donateModal) {
@@ -392,19 +393,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Submit donation — calls Vercel serverless function
+    // Submit donation — validates fields, notifies team, redirects to Stripe
     if (donateSubmit) {
         donateSubmit.addEventListener('click', async () => {
+            const donorName = donorNameInput ? donorNameInput.value.trim() : '';
+            const donorEmail = donorEmailInput ? donorEmailInput.value.trim() : '';
+
+            if (!donorName) {
+                donorNameInput.focus();
+                return;
+            }
+            if (!donorEmail || !donorEmail.includes('@')) {
+                donorEmailInput.focus();
+                return;
+            }
             if (!selectedAmount || selectedAmount < 1 || selectedAmount > 10000) return;
 
             donateSubmit.disabled = true;
             donateSubmitText.textContent = 'Redirecting to Stripe...';
 
             try {
+                // Send donor info to ARETE team via FormSubmit
+                fetch('https://formsubmit.co/ajax/aretewomengeneration@gmail.com', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: 'New Donation - $' + selectedAmount,
+                        name: donorName,
+                        email: donorEmail,
+                        amount: '$' + selectedAmount,
+                        _template: 'table'
+                    })
+                });
+
                 const res = await fetch('/api/create-checkout-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: selectedAmount, currency: 'usd' })
+                    body: JSON.stringify({
+                        amount: selectedAmount,
+                        currency: 'usd',
+                        donorName: donorName,
+                        donorEmail: donorEmail
+                    })
                 });
 
                 const data = await res.json();
@@ -422,34 +452,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // === Donation Return Toast ===
+    // === Donation Return — Thank You Modal ===
     const urlParams = new URLSearchParams(window.location.search);
     const donationStatus = urlParams.get('donation');
 
-    if (donationStatus) {
-        const toast = document.getElementById('donateToast');
-        const toastMsg = toast ? toast.querySelector('.donate-toast-message') : null;
-        const toastClose = toast ? toast.querySelector('.donate-toast-close') : null;
+    if (donationStatus === 'success') {
+        const thankyou = document.getElementById('donateThankyou');
+        if (thankyou) {
+            setTimeout(() => {
+                thankyou.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }, 300);
 
-        if (toast && toastMsg) {
-            if (donationStatus === 'success') {
-                toast.classList.add('success');
-                toastMsg.textContent = 'Thank you for your generous donation! Your support changes lives.';
-            } else if (donationStatus === 'cancelled') {
-                toast.classList.add('cancelled');
-                toastMsg.textContent = 'Donation was not completed. You can try again anytime.';
+            const thankyouClose = document.getElementById('thankyouClose');
+            if (thankyouClose) {
+                thankyouClose.addEventListener('click', () => {
+                    thankyou.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
             }
-
-            setTimeout(() => toast.classList.add('visible'), 300);
-            setTimeout(() => toast.classList.remove('visible'), 8000);
-
-            if (toastClose) {
-                toastClose.addEventListener('click', () => toast.classList.remove('visible'));
-            }
-
-            // Clean URL without reload
-            window.history.replaceState({}, '', window.location.pathname);
         }
+        window.history.replaceState({}, '', window.location.pathname);
     }
 
 });

@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { amount } = req.body;
+        const { amount, donorEmail } = req.body;
 
         const parsedAmount = Number(amount);
         if (!Number.isFinite(parsedAmount) || parsedAmount < 1 || parsedAmount > MAX_DONATION) {
@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
 
         const siteUrl = ALLOWED_ORIGINS[0];
 
-        const session = await stripe.checkout.sessions.create({
+        const sessionParams = {
             payment_method_types: ['card'],
             mode: 'payment',
             line_items: [{
@@ -53,7 +53,13 @@ module.exports = async (req, res) => {
             cancel_url: `${siteUrl}?donation=cancelled`,
             submit_type: 'donate',
             billing_address_collection: 'auto',
-        });
+        };
+
+        if (donorEmail && typeof donorEmail === 'string' && donorEmail.includes('@')) {
+            sessionParams.customer_email = donorEmail;
+        }
+
+        const session = await stripe.checkout.sessions.create(sessionParams);
 
         res.status(200).json({ url: session.url });
     } catch (err) {

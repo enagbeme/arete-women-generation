@@ -758,6 +758,16 @@
                 <p>Your generosity empowers women and girls to discover purpose and pursue excellence.</p>
             </div>
             <div class="donate-body">
+                <div class="donate-fields">
+                    <div class="donate-field">
+                        <label for="donorName">Your Name</label>
+                        <input type="text" id="donorName" placeholder="Enter your name" required>
+                    </div>
+                    <div class="donate-field">
+                        <label for="donorEmail">Email Address</label>
+                        <input type="email" id="donorEmail" placeholder="you@example.com" required>
+                    </div>
+                </div>
                 <div class="donate-amounts">
                     <button class="donate-amount" data-amount="10">$10</button>
                     <button class="donate-amount" data-amount="25">$25</button>
@@ -783,11 +793,23 @@
         </div>
     </div>
 
-    <!-- Donation Toast Notification -->
-    <div class="donate-toast" id="donateToast">
-        <div class="donate-toast-icon"></div>
-        <div class="donate-toast-message"></div>
-        <button class="donate-toast-close">&times;</button>
+    <!-- Donation Thank You Modal -->
+    <div class="donate-thankyou" id="donateThankyou">
+        <div class="donate-thankyou-content">
+            <div class="donate-thankyou-icon">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </div>
+            <h2>Thank You for Your Generosity!</h2>
+            <p>Your donation makes a real difference in the lives of women and girls. Because of your support, we can continue empowering them to discover purpose, pursue excellence, and create lasting change in their communities.</p>
+            <p class="donate-thankyou-sub">A confirmation has been sent to your email. We truly appreciate your heart for this mission.</p>
+            <div class="donate-thankyou-signature">
+                <span>With gratitude,</span>
+                <strong>The ARETE Women's Generation Team</strong>
+            </div>
+            <button class="btn btn-primary" id="thankyouClose">Continue to Site</button>
+        </div>
     </div>
 
     <script src="js/main.js"></script>

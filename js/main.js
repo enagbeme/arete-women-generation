@@ -311,4 +311,145 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // === Donation Modal ===
+    const donateModal = document.getElementById('donateModal');
+    const donateOverlay = document.getElementById('donateOverlay');
+    const donateClose = document.getElementById('donateClose');
+    const donateSubmit = document.getElementById('donateSubmit');
+    const donateSubmitText = donateSubmit ? donateSubmit.querySelector('.donate-submit-text') : null;
+    const customAmountInput = document.getElementById('customAmount');
+    const amountButtons = document.querySelectorAll('.donate-amount');
+    let selectedAmount = 50;
+    let donationType = 'one_time';
+
+    function openDonateModal() {
+        if (donateModal) {
+            donateModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeDonateModal() {
+        if (donateModal) {
+            donateModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function updateSubmitButton() {
+        if (!donateSubmitText) return;
+        donateSubmitText.textContent = 'Donate $' + selectedAmount;
+    }
+
+    // Open modal from "Give Now" button
+    const openDonateBtn = document.getElementById('openDonateBtn');
+    if (openDonateBtn) {
+        openDonateBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openDonateModal();
+        });
+    }
+
+    // Prevent clicks inside modal content from closing it
+    const donateContent = document.querySelector('.donate-modal-content');
+    if (donateContent) {
+        donateContent.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Close modal
+    if (donateOverlay) donateOverlay.addEventListener('click', closeDonateModal);
+    if (donateModal) donateModal.addEventListener('click', closeDonateModal);
+    if (donateClose) donateClose.addEventListener('click', closeDonateModal);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && donateModal && donateModal.classList.contains('active')) {
+            closeDonateModal();
+        }
+    });
+
+    // Amount selection
+    amountButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            amountButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedAmount = parseInt(btn.getAttribute('data-amount'));
+            if (customAmountInput) customAmountInput.value = '';
+            updateSubmitButton();
+        });
+    });
+
+    // Custom amount
+    if (customAmountInput) {
+        customAmountInput.addEventListener('input', () => {
+            const val = parseInt(customAmountInput.value);
+            if (val > 0) {
+                amountButtons.forEach(b => b.classList.remove('active'));
+                selectedAmount = val;
+                updateSubmitButton();
+            }
+        });
+        customAmountInput.addEventListener('focus', () => {
+            amountButtons.forEach(b => b.classList.remove('active'));
+        });
+    }
+
+    // Submit donation — calls Vercel serverless function
+    if (donateSubmit) {
+        donateSubmit.addEventListener('click', async () => {
+            if (!selectedAmount || selectedAmount < 1) return;
+
+            donateSubmit.disabled = true;
+            donateSubmitText.textContent = 'Redirecting to Stripe...';
+
+            try {
+                const res = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: selectedAmount, currency: 'usd' })
+                });
+
+                const data = await res.json();
+
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    throw new Error(data.error || 'Failed to create checkout session');
+                }
+            } catch (err) {
+                alert('Something went wrong. Please try again or contact us directly.');
+                donateSubmit.disabled = false;
+                updateSubmitButton();
+            }
+        });
+    }
+
+    // === Donation Return Toast ===
+    const urlParams = new URLSearchParams(window.location.search);
+    const donationStatus = urlParams.get('donation');
+
+    if (donationStatus) {
+        const toast = document.getElementById('donateToast');
+        const toastMsg = toast ? toast.querySelector('.donate-toast-message') : null;
+        const toastClose = toast ? toast.querySelector('.donate-toast-close') : null;
+
+        if (toast && toastMsg) {
+            if (donationStatus === 'success') {
+                toast.classList.add('success');
+                toastMsg.textContent = 'Thank you for your generous donation! Your support changes lives.';
+            } else if (donationStatus === 'cancelled') {
+                toast.classList.add('cancelled');
+                toastMsg.textContent = 'Donation was not completed. You can try again anytime.';
+            }
+
+            setTimeout(() => toast.classList.add('visible'), 300);
+            setTimeout(() => toast.classList.remove('visible'), 8000);
+
+            if (toastClose) {
+                toastClose.addEventListener('click', () => toast.classList.remove('visible'));
+            }
+
+            // Clean URL without reload
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }
+
 });
